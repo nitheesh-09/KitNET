@@ -483,6 +483,16 @@ export const socService = {
         };
       }
 
+      if (res.status === 401) {
+        const body = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          status: 401,
+          message: body.detail || 'OpenAI API key is invalid or unauthorized.',
+          ragReferenceAvailable: true,
+        };
+      }
+
       if (res.ok) {
         const analysis = await res.json();
         // Update cached incident

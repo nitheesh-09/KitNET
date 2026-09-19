@@ -1,4 +1,4 @@
-import os
+from . import config  # noqa: F401 — load .env before other modules read environment
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

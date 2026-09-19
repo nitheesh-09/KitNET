@@ -7,6 +7,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from openai import AuthenticationError
+
+from backend.app.config import get_openai_api_key, get_openai_model
 from backend.app.database import Base, get_db
 from backend.app.main import app
 from backend.app.knowledge.store import retrieve_knowledge, KNOWLEDGE_DOCUMENTS
@@ -83,6 +86,16 @@ def test_prompt_construction():
     assert "10.0.0.200" in prompt
     assert "Sample guidelines" in prompt
     assert "STRICT ADHERENCE TO EVIDENCE" in SYSTEM_PROMPT
+
+
+def test_openai_env_helpers():
+    """Verify OpenAI settings are read from environment without exposing secrets."""
+    with patch.dict(os.environ, {"OPENAI_API_KEY": "  sk-test-key  ", "OPENAI_MODEL": "gpt-4o-mini"}, clear=False):
+        assert get_openai_api_key() == "sk-test-key"
+        assert get_openai_model() == "gpt-4o-mini"
+
+    with patch.dict(os.environ, {"OPENAI_API_KEY": "   "}, clear=False):
+        assert get_openai_api_key() is None
 
 
 def test_missing_api_key_returns_503(client):
@@ -183,6 +196,36 @@ def test_mocked_openai_investigation(client):
             assert detail["ai_summary"] == mock_analysis["summary"]
             assert detail["ai_analysis"] is not None
             assert detail["ai_generated_at"] is not None
+
+
+def test_invalid_api_key_returns_401(client):
+    """Verify invalid OpenAI credentials return a clear authentication error."""
+    for i in range(2):
+        client.post("/events", json={
+            "timestamp": f"2026-09-19T10:0{i}:00",
+            "source_ip": "10.0.0.200",
+            "destination_ip": "10.0.0.30",
+            "username": "admin",
+            "event_type": "login_failed",
+            "protocol": "TCP",
+            "service": "AUTH",
+            "status": "failed",
+        })
+    client.post("/detections/run")
+    client.post("/incidents/correlate")
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.side_effect = AuthenticationError(
+        "Invalid API key",
+        response=MagicMock(status_code=401),
+        body={"error": {"message": "Incorrect API key provided"}},
+    )
+
+    with patch("backend.app.ai.engine.OpenAI", return_value=mock_client):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-invalid-key"}):
+            res = client.post("/incidents/INC-001/investigate")
+            assert res.status_code == 401
+            assert "invalid" in res.json()["detail"].lower() or "unauthorized" in res.json()["detail"].lower()
 
 
 def test_malformed_ai_response_handling(client):

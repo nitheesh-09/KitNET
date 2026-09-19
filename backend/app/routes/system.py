@@ -1,7 +1,7 @@
-import os
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from ..config import get_openai_api_key, get_openai_model
 from ..database import get_db
 from ..models.event import Event
 from ..models.detection import Detection
@@ -24,9 +24,9 @@ def get_system_pipeline_status(db: Session = Depends(get_db)):
     except Exception:
         db_connected = False
 
-    openai_key_present = bool(os.getenv("OPENAI_API_KEY"))
+    openai_key_present = get_openai_api_key() is not None
     ai_status = "configured" if openai_key_present else "unavailable"
-    ai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    ai_model = get_openai_model()
 
     events_count = db.query(Event).count() if db_connected else 0
     detections_count = db.query(Detection).count() if db_connected else 0

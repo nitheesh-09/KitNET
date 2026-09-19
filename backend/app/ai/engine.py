@@ -1,11 +1,17 @@
-import os
 import json
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any, List
+from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from openai import OpenAI
+from openai import (
+    OpenAI,
+    AuthenticationError,
+    APIConnectionError,
+    APITimeoutError,
+    RateLimitError,
+)
 
+from ..config import get_openai_api_key, get_openai_model
 from ..models.incident import Incident
 from ..models.event import Event
 from ..models.detection import Detection
@@ -22,8 +28,8 @@ class AIInvestigationEngine:
 
     def __init__(self, db: Session, client: Optional[OpenAI] = None):
         self.db = db
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        self.api_key = get_openai_api_key()
+        self.model = get_openai_model()
         self.client = client
 
     def get_client(self) -> OpenAI:
@@ -32,7 +38,7 @@ class AIInvestigationEngine:
         if not self.api_key:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="OpenAI API key is not configured. Set OPENAI_API_KEY in environment to enable automated AI investigations.",
+                detail="OpenAI API key is not configured. Set OPENAI_API_KEY in backend/.env or environment to enable automated AI investigations.",
             )
         return OpenAI(api_key=self.api_key)
 
@@ -98,8 +104,27 @@ class AIInvestigationEngine:
             analysis = AIInvestigationOutput.model_validate(parsed_dict)
         except HTTPException:
             raise
+        except AuthenticationError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="OpenAI API key is invalid or unauthorized. Verify OPENAI_API_KEY in backend/.env.",
+            )
+        except (APIConnectionError, APITimeoutError):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="OpenAI API is temporarily unavailable (network or timeout). Local RAG knowledge retrieval remains available.",
+            )
+        except RateLimitError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="OpenAI API rate limit exceeded. Retry the investigation later.",
+            )
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="AI Investigation generation failed: malformed model output.",
+            )
         except Exception as e:
-            # Handle malformed model output or connection error safely
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"AI Investigation generation failed: {str(e)}",
