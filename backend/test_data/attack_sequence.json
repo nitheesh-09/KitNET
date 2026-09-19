@@ -1,0 +1,101 @@
+[
+  {
+    "timestamp": "2026-09-19T10:32:01",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_failed",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "failed",
+    "metadata": { "attempt": 1, "tool": "hydra" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:04",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_failed",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "failed",
+    "metadata": { "attempt": 2, "tool": "hydra" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:07",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_failed",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "failed",
+    "metadata": { "attempt": 3, "tool": "hydra" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:10",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_failed",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "failed",
+    "metadata": { "attempt": 4, "tool": "hydra" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:13",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_failed",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "failed",
+    "metadata": { "attempt": 5, "tool": "hydra" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:18",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "admin",
+    "event_type": "login_success",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "success",
+    "metadata": { "session_id": "sess_8819a" }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:25",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.30",
+    "username": "root",
+    "event_type": "privilege_escalation",
+    "protocol": "TCP",
+    "service": "AUTH",
+    "status": "alert",
+    "metadata": { "command": "sudo su", "target_uid": 0 }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:38",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.20",
+    "username": "root",
+    "event_type": "database_access",
+    "protocol": "TCP",
+    "service": "MYSQL",
+    "status": "success",
+    "metadata": { "query": "SELECT * FROM customer_vault", "rows": 4500 }
+  },
+  {
+    "timestamp": "2026-09-19T10:32:55",
+    "source_ip": "10.0.0.200",
+    "destination_ip": "10.0.0.20",
+    "username": null,
+    "event_type": "large_data_transfer",
+    "protocol": "TCP",
+    "service": "NET",
+    "status": "success",
+    "metadata": { "bytes": 84500000, "direction": "egress" }
+  }
+]

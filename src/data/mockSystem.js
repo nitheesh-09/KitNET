@@ -1,0 +1,76 @@
+// Centralized mock data: System Status & Infrastructure Health
+// Demonstrates local network operational status and intentionally unconnected future phase layers
+
+export const MOCK_SYSTEM_STATUS = {
+  environment: {
+    name: 'CYBERNET',
+    subnet: '10.0.0.0/24',
+    status: 'ONLINE',
+    uptime: '14 days, 06 hours, 22 mins',
+    healthScore: '98.4%',
+  },
+  infrastructure: [
+    {
+      name: 'Web Server',
+      ip: '10.0.0.10',
+      service: 'Nginx 1.24.0',
+      status: 'ONLINE',
+      uptime: '14d 6h',
+      latency: '0.4 ms',
+      memory: '42%',
+      cpu: '28%',
+      phase: 'Phase 1 - Monitored Host',
+    },
+    {
+      name: 'DB Server',
+      ip: '10.0.0.20',
+      service: 'MySQL 8.0.35',
+      status: 'ONLINE',
+      uptime: '14d 6h',
+      latency: '0.8 ms',
+      memory: '78%',
+      cpu: '64%',
+      phase: 'Phase 1 - Monitored Host',
+    },
+    {
+      name: 'Auth Server',
+      ip: '10.0.0.30',
+      service: 'Python Auth 3.11',
+      status: 'ONLINE',
+      uptime: '3d 11h',
+      latency: '1.2 ms',
+      memory: '61%',
+      cpu: '89%',
+      phase: 'Phase 1 - Monitored Host',
+    },
+  ],
+  pipelineComponents: [
+    {
+      id: 'comp-event-pipeline',
+      name: 'EVENT PIPELINE',
+      target: 'Docker / Syslog Ingest',
+      status: 'NOT CONNECTED',
+      plannedPhase: 'Phase 2',
+      details: 'Docker socket and syslog collector streaming to ingest queue.',
+      endpoint: 'tcp://telemetry.local:514',
+    },
+    {
+      id: 'comp-fastapi',
+      name: 'FASTAPI BACKEND',
+      target: 'Core REST & WebSocket API',
+      status: 'NOT CONNECTED',
+      plannedPhase: 'Phase 2',
+      details: 'FastAPI microservice exposing telemetry endpoints and incident CRUD.',
+      endpoint: 'http://127.0.0.1:8000/api/v1',
+    },
+    {
+      id: 'comp-ai-engine',
+      name: 'AI ENGINE',
+      target: 'Investigation & Correlation Engine',
+      status: 'NOT CONNECTED',
+      plannedPhase: 'Phase 3',
+      details: 'Automated correlation, root cause reasoning, and incident summarization.',
+      endpoint: 'grpc://ai-core.local:50051',
+    },
+  ],
+};
